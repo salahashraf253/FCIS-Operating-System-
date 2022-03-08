@@ -5,7 +5,7 @@
 #endif
 
 #include <inc/types.h>
-
+//FOS
 // Function to activate the kernel command prompt
 void run_command_prompt();
 
