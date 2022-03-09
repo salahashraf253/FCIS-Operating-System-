@@ -10,6 +10,7 @@ FUNCTIONS:	readline, cprintf, execute_command, run_command_prompt, command_kerne
 =====================================================================================================================================================================================================
  */
 
+
 #include <inc/stdio.h>
 #include <inc/string.h>
 #include <inc/memlayout.h>
@@ -128,8 +129,156 @@ struct Command commands[] =
 
 //Number of commands = size of the array / size of command structure
 #define NUM_OF_COMMANDS (sizeof(commands)/sizeof(commands[0]))
+//..................................
+//Salah Code
+#define BUFLEN 1024
+//dp code
+int getMin2(int x,int y){
+	if(x>=y)
+		return x;
+	else return y;
+}
+int getMin(int x,int y,int z){
+	if(x<y&&x<z){
+		return x;
+	}
+	else if(y<x&&y<z){
+		return y;
+	}
+	else return z;
+}
+int editDistanceUsingDP(char *str1,char *str2){
+	int m =strlen(str1);
+	int n= strlen(str2);
+	int dp[m+1][n+1];
+	for(int i=0;i<=m;i++)
+	{
+		for(int j=0;j<=n;j++){
+			if(i==0){
+				dp[i][j]=j;
+			}
+			else if(j==0){
+				dp[i][j]=1;
+			}
+            else if (str1[i - 1] == str2[j - 1]){
+            	dp[i][j] = dp[i - 1][j - 1];
+            }
+            else {
+            	 //dp[i][j]= 1 + getMin2(dp[i][j - 1],dp[i - 1][j - 1]); // Replace
+                   dp[i][j]=
+            	           			 1 + getMin(dp[i][j - 1], // Insert
+            	           			 dp[i - 1][j], // Remove
+            	          	         dp[i - 1][j - 1]); // Replace
+            }
+		}
+	}
+	return dp[m][n];
+}
+char* getTheNearestCommandName(char *commandName){
+	//int mn=editDistanceUsingDP(commandName , commands[0].name);
+	int mn=150;
+	int commandNameLength=strlen(commandName);
+	int numberOfEdits;
+	char *nearestCommand=commandName;
+	for (int i = 0; i < NUM_OF_COMMANDS; i++)
+	{
+	    numberOfEdits=editDistanceUsingDP(commandName , commands[i].name);
+		if(numberOfEdits<mn)
+		{
+			mn=numberOfEdits;
+			nearestCommand=commands[i].name;
+//			cprintf("Nearest : ");
+//			for(int j=0;j<strlen(commands[i].name);j++){
+//				cprintf("%c",commands[i].name[j]);
+//			}
+//			cprintf("\n");
+		}
+//		int difference=commandNameLength-strlen(commands[i].name);
+//		switch(difference)
+//		{
+//		case 0:
+////		case 1:
+////		case -1:
+//		    numberOfEdits=editDistanceUsingDP(commandName , commands[i].name);
+//			if(numberOfEdits<mn)
+//			{
+//				mn=numberOfEdits;
+//				nearestCommand=commands[i].name;
+//	//			cprintf("Nearest : ");
+//	//			for(int j=0;j<strlen(commands[i].name);j++){
+//	//				cprintf("%c",commands[i].name[j]);
+//	//			}
+//	//			cprintf("\n");
+//			}
+//			break;
+//		default:
+//			break;
+//		}
+	}
+	commandName=nearestCommand;
+	//cprintf("Command Name : %d\n",strlen(commandName));
+	return commandName;
+} //end of DP code
+void modifiedReadLine(const char *prompt,char *buf)
+{
+	int i=0,c,echoing ;
+	if(prompt!=NULL){
+		cprintf("%s",prompt);
+	}
+	echoing =iscons(0);
+	bool foundFirstSpace=0;
+	while(1){
+		c=getchar();
+		if (c < 0){
+			if (c != -E_EOF){
+				cprintf("read error: %e\n", c);
+			}
+			return;
+		}
+		else if(c==' ' && foundFirstSpace == 0){
+			foundFirstSpace=1;
+			//getTheNearestCommandName(buf);
+			char *arr=getTheNearestCommandName(buf);
+			//cprintf("arr :%s \n",arr);
+//			for(int j=0;j<i;j++){
+//				cprintf("%c",arr[j]);
+//			}
+//			cprintf("\n");
+			for(int j=0;j<i;j++){
+				cputchar('\b');
+			}
+			for(int j=0;j<i;j++){
+				cputchar(arr[j]);
+				buf[j]=arr[j];
+			}
+			char space=' ';
+			cputchar(space);
+			buf[i++] = space;
+			//cprintf(" New Command : %s",arr);
+		}
+		else if (c >= ' ' && i < BUFLEN-1)
+		{
+			if (echoing)
+				cputchar(c);
+			buf[i++] = c;
+		}
+		else if (c == '\b' && i > 0)
+		{
+			if (echoing)
+				cputchar(c);
+			i--;
+		}
+		else if (c == '\n' || c == '\r')
+		{
+			if (echoing)
+				cputchar(c);
+			buf[i] = 0;
+			return;
+		}
+	}
+}
 
-
+//..........................
 //invoke the command prompt
 void run_command_prompt()
 {
@@ -142,8 +291,9 @@ void run_command_prompt()
 	while (1==1)
 	{
 		//get command line
-		readline("FOS> ", command_line);
-
+		//readline("FOS> ", command_line);
+		modifiedReadLine("FOS> ",command_line);
+		//cprintf("Command Line : %s \n",command_line);
 		//parse and execute the command
 		if (command_line != NULL)
 			if (execute_command(command_line) < 0)
@@ -501,20 +651,31 @@ int command_frequency_max_character(int number_of_arguments, char **arguments)
  * Return:
  * 		The length of the longest word.
  */
+
+int charToInt(char c){
+	//ASCII value of _ is 95
+	return c-94;
+}
+int getMaximum(int num1,int num2){
+	if(num1>num2)
+		return num1;
+	else
+		return num2;
+}
 int frequency_max_character(int num_of_arguments, char** arguments)
 {
 	//Assignment1.Q2
 	//put your logic here and change the return according to your logic
 	//...
 	int mx=-1;
-	int freq[122]={};
-
+	int freq[30]={0};
 
 	for(int i=0;i<strlen(arguments[1]);i++){
-		freq[(int)arguments[1][i]]++;
-		if(freq[(int)arguments[1][i]]>mx){
-			mx=freq[(int)arguments[1][i]];
-		}
+		//freq[(int)((int)(arguments[1][i])-96)]++;
+		int index=charToInt(arguments[1][i]);
+		freq[index]++;
+		//cprintf("%d \n ",index);
+		mx=getMaximum(mx,freq[index]);
 	}
 	return mx;
 }
