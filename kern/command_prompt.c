@@ -10,8 +10,7 @@ FUNCTIONS:	readline, cprintf, execute_command, run_command_prompt, command_kerne
 =====================================================================================================================================================================================================
  */
 
-///.....................................Note: Challange is implemented
-//
+
 #include <inc/stdio.h>
 #include <inc/string.h>
 #include <inc/memlayout.h>
@@ -130,8 +129,9 @@ struct Command commands[] =
 
 //Number of commands = size of the array / size of command structure
 #define NUM_OF_COMMANDS (sizeof(commands)/sizeof(commands[0]))
-//..................................
-//Salah Code
+
+// ------------------------------------------------------------
+// ------------------------------------------------------------
 #define BUFLEN 1024
 //dp code
 int getMin2(int x,int y){
@@ -166,17 +166,13 @@ int editDistanceUsingDP(char *str1,char *str2){
             }
             else {
             	 //dp[i][j]= 1 + getMin2(dp[i][j - 1],dp[i - 1][j - 1]); // Replace
-                   dp[i][j]=
-            	           			 1 + getMin(dp[i][j - 1], // Insert
-            	           			 dp[i - 1][j], // Remove
-            	          	         dp[i - 1][j - 1]); // Replace
+                   dp[i][j]= 1 + getMin(dp[i][j - 1], dp[i - 1][j],dp[i - 1][j - 1]);
             }
 		}
 	}
 	return dp[m][n];
 }
 char* getTheNearestCommandName(char *commandName){
-	//int mn=editDistanceUsingDP(commandName , commands[0].name);
 	int mn=150;
 	int commandNameLength=strlen(commandName);
 	int numberOfEdits;
@@ -188,33 +184,7 @@ char* getTheNearestCommandName(char *commandName){
 		{
 			mn=numberOfEdits;
 			nearestCommand=commands[i].name;
-//			cprintf("Nearest : ");
-//			for(int j=0;j<strlen(commands[i].name);j++){
-//				cprintf("%c",commands[i].name[j]);
-//			}
-//			cprintf("\n");
 		}
-//		int difference=commandNameLength-strlen(commands[i].name);
-//		switch(difference)
-//		{
-//		case 0:
-////		case 1:
-////		case -1:
-//		    numberOfEdits=editDistanceUsingDP(commandName , commands[i].name);
-//			if(numberOfEdits<mn)
-//			{
-//				mn=numberOfEdits;
-//				nearestCommand=commands[i].name;
-//	//			cprintf("Nearest : ");
-//	//			for(int j=0;j<strlen(commands[i].name);j++){
-//	//				cprintf("%c",commands[i].name[j]);
-//	//			}
-//	//			cprintf("\n");
-//			}
-//			break;
-//		default:
-//			break;
-//		}
 	}
 	commandName=nearestCommand;
 	//cprintf("Command Name : %d\n",strlen(commandName));
@@ -237,14 +207,8 @@ void modifiedReadLine(const char *prompt,char *buf)
 			return;
 		}
 		else if(c==' ' && foundFirstSpace == 0){
-			foundFirstSpace=1;
-			//getTheNearestCommandName(buf);
+			foundFirstSpace=1;;
 			char *arr=getTheNearestCommandName(buf);
-			//cprintf("arr :%s \n",arr);
-//			for(int j=0;j<i;j++){
-//				cprintf("%c",arr[j]);
-//			}
-//			cprintf("\n");
 			for(int j=0;j<i;j++){
 				cputchar('\b');
 			}
@@ -255,7 +219,6 @@ void modifiedReadLine(const char *prompt,char *buf)
 			char space=' ';
 			cputchar(space);
 			buf[i++] = space;
-			//cprintf(" New Command : %s",arr);
 		}
 		else if (c >= ' ' && i < BUFLEN-1)
 		{
@@ -278,8 +241,10 @@ void modifiedReadLine(const char *prompt,char *buf)
 		}
 	}
 }
+// ------------------------------------------------------------
+// ------------------------------------------------------------
 
-//..........................
+
 //invoke the command prompt
 void run_command_prompt()
 {
@@ -292,9 +257,10 @@ void run_command_prompt()
 	while (1==1)
 	{
 		//get command line
-		//readline("FOS> ", command_line);
-		modifiedReadLine("FOS> ",command_line);
+		readline("FOS> ", command_line);
+		//modifiedReadLine("FOS> ",command_line);
 		//cprintf("Command Line : %s \n",command_line);
+
 		//parse and execute the command
 		if (command_line != NULL)
 			if (execute_command(command_line) < 0)
