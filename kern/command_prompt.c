@@ -134,11 +134,6 @@ struct Command commands[] =
 // ------------------------------------------------------------
 #define BUFLEN 1024
 //dp code
-int getMin2(int x,int y){
-	if(x>=y)
-		return x;
-	else return y;
-}
 int getMin(int x,int y,int z){
 	if(x<y&&x<z){
 		return x;
@@ -148,9 +143,9 @@ int getMin(int x,int y,int z){
 	}
 	else return z;
 }
-int editDistanceUsingDP(char *str1,char *str2){
-	int m =strlen(str1);
-	int n= strlen(str2);
+int editDistanceUsingDP(char *s1,char *s2){
+	int m =strlen(s1);
+	int n= strlen(s2);
 	int dp[m+1][n+1];
 	for(int i=0;i<=m;i++)
 	{
@@ -161,7 +156,7 @@ int editDistanceUsingDP(char *str1,char *str2){
 			else if(j==0){
 				dp[i][j]=1;
 			}
-            else if (str1[i - 1] == str2[j - 1]){
+            else if (s1[i - 1] == s2[j - 1]){
             	dp[i][j] = dp[i - 1][j - 1];
             }
             else {
@@ -190,9 +185,20 @@ char* getTheNearestCommandName(char *commandName){
 	//cprintf("Command Name : %d\n",strlen(commandName));
 	return commandName;
 } //end of DP code
+int getCommandIndex(char *commandName)
+{
+	//check if the written command is a valid command or no
+	for(int i=0;i<NUM_OF_COMMANDS;i++){
+		if(strcmp(commandName,commands[i].name)==0){
+			return i;
+		}
+	}
+	return -1; // command is not found
+}
 void modifiedReadLine(const char *prompt,char *buf)
 {
 	int i=0,c,echoing ;
+	int lengthOfCommand=0;
 	if(prompt!=NULL){
 		cprintf("%s",prompt);
 	}
@@ -209,13 +215,17 @@ void modifiedReadLine(const char *prompt,char *buf)
 		else if(c==' ' && foundFirstSpace == 0){
 			foundFirstSpace=1;;
 			char *arr=getTheNearestCommandName(buf);
-			for(int j=0;j<i;j++){
-				cputchar('\b');
+			if(getCommandIndex(buf) == -1)
+			{
+				for(int j=0;j<i;j++){
+					cputchar('\b');
+				}
+				for(int j=0;j<i;j++){
+					cputchar(arr[j]);
+					buf[j]=arr[j];
+				}
 			}
-			for(int j=0;j<i;j++){
-				cputchar(arr[j]);
-				buf[j]=arr[j];
-			}
+			lengthOfCommand=i;
 			char space=' ';
 			cputchar(space);
 			buf[i++] = space;
@@ -228,6 +238,9 @@ void modifiedReadLine(const char *prompt,char *buf)
 		}
 		else if (c == '\b' && i > 0)
 		{
+			if(lengthOfCommand==i){
+				foundFirstSpace=0;
+			}
 			if (echoing)
 				cputchar(c);
 			i--;
@@ -257,8 +270,8 @@ void run_command_prompt()
 	while (1==1)
 	{
 		//get command line
-		readline("FOS> ", command_line);
-		//modifiedReadLine("FOS> ",command_line);
+		//readline("FOS> ", command_line);
+		modifiedReadLine("FOS> ",command_line);
 		//cprintf("Command Line : %s \n",command_line);
 
 		//parse and execute the command
@@ -288,21 +301,21 @@ int execute_command(char *command_string)
 		return 0;
 
 	// Lookup in the commands array and execute the command
-	int command_found = 0;
-	int i ;
-	for (i = 0; i < NUM_OF_COMMANDS; i++)
-	{
-		if (strcmp(arguments[0], commands[i].name) == 0)
-		{
-			command_found = 1;
-			break;
-		}
-	}
+	int commandIndex = getCommandIndex(arguments[0]);
+//	int i ;
+//	for (i = 0; i < NUM_OF_COMMANDS; i++)
+//	{
+//		if (strcmp(arguments[0], commands[i].name) == 0)
+//		{
+//			command_found = 1;
+//			break;
+//		}
+//	}
 
-	if(command_found)
+	if(commandIndex != -1)
 	{
 		int return_value;
-		return_value = commands[i].function_to_execute(number_of_arguments, arguments);
+		return_value = commands[commandIndex].function_to_execute(number_of_arguments, arguments);
 		return return_value;
 	}
 	else
