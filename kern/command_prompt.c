@@ -134,14 +134,25 @@ struct Command commands[] =
 // ------------------------------------------------------------
 #define BUFLEN 1024
 //dp code
-int getMin(int x,int y,int z){
-	if(x<y&&x<z){
+int min(int x,int y){
+	if(x==y)return x;
+	else if(x<y)return x;
+	else return y;
+}
+int abs(int x){
+	if(x>0)
 		return x;
-	}
-	else if(y<x&&y<z){
-		return y;
-	}
-	else return z;
+	else return x*-1;
+}
+int getMin(int x,int y,int z){
+//	if(x<=y&&x<=z){
+//		return x;
+//	}
+//	else if(y<=x&&y<=z){
+//		return y;
+//	}
+//	else return z;
+	return min(min(x,y),z);
 }
 int editDistanceUsingDP(char *s1,char *s2){
 	int m =strlen(s1);
@@ -170,15 +181,18 @@ int editDistanceUsingDP(char *s1,char *s2){
 char* getTheNearestCommandName(char *commandName){
 	int mn=150;
 	int commandNameLength=strlen(commandName);
-	int numberOfEdits;
+	int numberOfEdits,difference;
 	char *nearestCommand=commandName;
 	for (int i = 0; i < NUM_OF_COMMANDS; i++)
 	{
-	    numberOfEdits=editDistanceUsingDP(commandName , commands[i].name);
-		if(numberOfEdits<mn)
-		{
-			mn=numberOfEdits;
-			nearestCommand=commands[i].name;
+		difference = abs(commandNameLength-strlen(commands[i].name));
+		if(difference == 0 || difference == 1 || difference == 2){
+		    numberOfEdits=editDistanceUsingDP(commandName , commands[i].name);
+			if(numberOfEdits<mn)
+			{
+				mn=numberOfEdits;
+				nearestCommand=commands[i].name;
+			}
 		}
 	}
 	commandName=nearestCommand;
@@ -213,19 +227,24 @@ void modifiedReadLine(const char *prompt,char *buf)
 			return;
 		}
 		else if(c==' ' && foundFirstSpace == 0){
-			foundFirstSpace=1;;
-			char *arr=getTheNearestCommandName(buf);
+			foundFirstSpace=1;
+			int lengthOfRigthCommand=i;
+			//cprintf("Command Name  : %s\n",buf);
 			if(getCommandIndex(buf) == -1)
 			{
+				char *arr=getTheNearestCommandName(buf);
+				//cprintf("Nearest Command : %s\n",arr);
 				for(int j=0;j<i;j++){
 					cputchar('\b');
 				}
-				for(int j=0;j<i;j++){
+			    lengthOfRigthCommand=strlen(arr);
+				for(int j=0;j<lengthOfRigthCommand;j++){
 					cputchar(arr[j]);
 					buf[j]=arr[j];
 				}
 			}
-			lengthOfCommand=i;
+			lengthOfCommand=lengthOfRigthCommand;
+			i=lengthOfRigthCommand;
 			char space=' ';
 			cputchar(space);
 			buf[i++] = space;
@@ -257,7 +276,7 @@ void modifiedReadLine(const char *prompt,char *buf)
 // ------------------------------------------------------------
 // ------------------------------------------------------------
 
-
+//-------------------------------------------------Main Function----------------------------------
 //invoke the command prompt
 void run_command_prompt()
 {
@@ -270,8 +289,8 @@ void run_command_prompt()
 	while (1==1)
 	{
 		//get command line
-		//readline("FOS> ", command_line);
-		modifiedReadLine("FOS> ",command_line);
+		readline("FOS> ", command_line);
+		//modifiedReadLine("FOS> ",command_line);
 		//cprintf("Command Line : %s \n",command_line);
 
 		//parse and execute the command
@@ -706,6 +725,5 @@ void ExecuteCommands()
 	for(int i=0;i<ctr;i++){
 		execute_command(commands[i]);
 	}
-
 }
 
