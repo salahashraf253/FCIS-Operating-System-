@@ -10,7 +10,8 @@ FUNCTIONS:	readline, cprintf, execute_command, run_command_prompt, command_kerne
 =====================================================================================================================================================================================================
  */
 
-
+///.....................................Note: Challange is implemented
+//
 #include <inc/stdio.h>
 #include <inc/string.h>
 #include <inc/memlayout.h>
@@ -702,6 +703,7 @@ void ExecuteCommands()
 	//Assignment1.BONUS
 	//put your logic here
 	//should allow the user to enter a set of commands (max 10 commands), and execute them after pressing $.
+	cprintf("Enter a set of commands (max 10), one per line, terminated by '$': \n");
 	char *endingCharacter="$";
 	char *arguments[MAX_ARGUMENTS];
 	bool endCommands=0;
