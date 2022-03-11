@@ -209,6 +209,9 @@ int getCommandIndex(char *commandName)
 	}
 	return -1; // command is not found
 }
+//this function is challenge 1 & made by me
+//this function is responsible for auto correct command by
+//using edit distance , it works when you press space after command name directly
 void modifiedReadLine(const char *prompt,char *buf)
 {
 	int i=0,c,echoing ;
@@ -289,8 +292,10 @@ void run_command_prompt()
 	while (1==1)
 	{
 		//get command line
-		readline("FOS> ", command_line);
-		//modifiedReadLine("FOS> ",command_line);
+		//readline("FOS> ", command_line);
+
+		//this function is challenge 1 & made by me
+		modifiedReadLine("FOS> ",command_line);
 		//cprintf("Command Line : %s \n",command_line);
 
 		//parse and execute the command
@@ -614,20 +619,30 @@ int bytes(int num_of_arguments, char** arguments)
 	if(!(num_of_arguments &1)){
 		return -1;
 	}
-	int sum=0,number;
-	for(int i=1;i<num_of_arguments;i+=2){
+	int sum=0,number,units;
+	char symbol;
+	for(int i=1;i<num_of_arguments;i+=2)
+	{
 		number=strtol(arguments[i],NULL,10);
+	    symbol = arguments[i+1][0];
+		switch(symbol){
+		case 'm':
+		case 'M':
+			units=1024*1024;
+			break;
+		case 'k':
+		case 'K':
+			units=1024;
+			break;
+		case 'b':
+		case 'B':
+			units=1;
+			break;
+		default :
+			return -1;
+		}
 
-		if(strcmp(arguments[i+1],"M")==0 || strcmp(arguments[i+1],"m")==0){
-			sum+=(number*1024*1024);
-		}
-		else if(strcmp(arguments[i+1],"K")==0||strcmp(arguments[i+1],"k")==0){
-			sum+=(number*1024);
-		}
-		else if(strcmp(arguments[i+1],"B")==0 || strcmp(arguments[i+1],"b")==0){
-			sum+=number;
-		}
-		else return -1;
+		sum+=(number*units);
 	}
 	//cprintf("Sum = %d\n", sum);
 	return sum;

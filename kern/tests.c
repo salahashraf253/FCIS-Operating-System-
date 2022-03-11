@@ -134,7 +134,8 @@ int TestAss1Q2()
 	}
 
 	//case6:
-	char cr6[100] = "focc defenseless";
+	//char cr6[100] = "focc defenseless";
+	char cr6[100] = "fmc defenseless";
 	numOfArgs = 0;
 	strsplit(cr6, WHITESPACE, args, &numOfArgs) ;
 	ret = frequency_max_character(numOfArgs, args) ;
@@ -145,7 +146,8 @@ int TestAss1Q2()
 	}
 
 	//case7:
-	char cr7[100] = "focc pppppppppppppppp";
+	//char cr7[100] = "focc pppppppppppppppp";
+	char cr7[100] = "fmc pppppppppppppppp";
 	numOfArgs = 0;
 	strsplit(cr7, WHITESPACE, args, &numOfArgs) ;
 	ret = frequency_max_character(numOfArgs, args) ;
