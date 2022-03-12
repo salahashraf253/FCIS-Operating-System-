@@ -89,8 +89,12 @@ struct Command commands[] =
 		{ "rum", "reads one byte from specific location" ,command_readmem},
 		{ "meminfo", "Display number of free frames", command_meminfo},
 
+		//LAB2 : Examples
+		{"wum","write 1 byte in the memory at given address",command_writeMemory},
+		{"rum","read 1 byte from the memory at given virtual address",command_readMemory},
 		//TODO: LAB2 Hands-on: add the commands here
-
+		{"read_block","reads the <N> bytes starting from <virtual address> and display them",
+				command_read_block},
 
 		//LAB3: Examples
 		{ "ikb", "Lab3.Example: shows mapping info of KERNEL_BASE" ,command_kernel_base_info},
@@ -171,7 +175,6 @@ int editDistanceUsingDP(char *s1,char *s2){
             	dp[i][j] = dp[i - 1][j - 1];
             }
             else {
-            	 //dp[i][j]= 1 + getMin2(dp[i][j - 1],dp[i - 1][j - 1]); // Replace
                    dp[i][j]= 1 + getMin(dp[i][j - 1], dp[i - 1][j],dp[i - 1][j - 1]);
             }
 		}
@@ -231,8 +234,11 @@ void modifiedReadLine(const char *prompt,char *buf)
 		}
 		else if(c==' ' && foundFirstSpace == 0){
 			foundFirstSpace=1;
-			int lengthOfRigthCommand=i;
+//			if(strcmp(buf,"read_block")==0){
+//				cprintf("Command Name  : %s\n",buf);
+//			}
 			//cprintf("Command Name  : %s\n",buf);
+
 			if(getCommandIndex(buf) == -1)
 			{
 				char *arr=getTheNearestCommandName(buf);
@@ -240,14 +246,14 @@ void modifiedReadLine(const char *prompt,char *buf)
 				for(int j=0;j<i;j++){
 					cputchar('\b');
 				}
-			    lengthOfRigthCommand=strlen(arr);
+			    int lengthOfRigthCommand=strlen(arr);
 				for(int j=0;j<lengthOfRigthCommand;j++){
 					cputchar(arr[j]);
 					buf[j]=arr[j];
 				}
+				lengthOfCommand=lengthOfRigthCommand;
+				i=lengthOfRigthCommand;
 			}
-			lengthOfCommand=lengthOfRigthCommand;
-			i=lengthOfRigthCommand;
 			char space=' ';
 			cputchar(space);
 			buf[i++] = space;
@@ -258,9 +264,12 @@ void modifiedReadLine(const char *prompt,char *buf)
 				cputchar(c);
 			buf[i++] = c;
 		}
+		//0 1 2 3 4
+		//a d d   2
 		else if (c == '\b' && i > 0)
 		{
-			if(lengthOfCommand==i){
+			if(lengthOfCommand==i-1){
+				//cprintf("------fddddddd---");
 				foundFirstSpace=0;
 			}
 			if (echoing)
@@ -284,10 +293,8 @@ void modifiedReadLine(const char *prompt,char *buf)
 void run_command_prompt()
 {
 	//CAUTION: DON'T CHANGE OR COMMENT THIS LINE======
-	TestAssignment1();
+	//TestAssignment1();
 	//================================================
-
-	char command_line[1024];
 
 	while (1==1)
 	{
@@ -295,7 +302,10 @@ void run_command_prompt()
 		//readline("FOS> ", command_line);
 
 		//this function is challenge 1 & made by me
-		modifiedReadLine("FOS> ",command_line);
+		//cprintf("CommandLine : %s\n",command_line);
+		char command_line[1024]={};
+		modifiedReadLine("FOS> ", command_line);
+
 		//cprintf("Command Line : %s \n",command_line);
 
 		//parse and execute the command
@@ -641,7 +651,6 @@ int bytes(int num_of_arguments, char** arguments)
 		default :
 			return -1;
 		}
-
 		sum+=(number*units);
 	}
 	//cprintf("Sum = %d\n", sum);
@@ -741,4 +750,33 @@ void ExecuteCommands()
 		execute_command(commands[i]);
 	}
 }
+//Laba 2 hands on Commands ----------------------------------------
 
+//write_mem 0xf00000000 c
+int command_writeMemory(int number_of_arguments,char **arguments){
+	char *ptr;
+	ptr=(char*)(strtol(arguments[1],NULL,16));
+
+	*ptr=arguments[2][0];
+	//cprintf("%x --- %c \n",ptr,*ptr);
+	return 0;
+
+}
+//read_mem 0xf00000000
+int command_readMemory(int number_of_arguments,char **arguments){
+	unsigned int address=strtol(arguments[1],NULL,16);
+	unsigned char *ptr=(unsigned char*)(address);
+	cprintf("Value at address %x is %c\n",ptr,*ptr);
+	return 0;
+}
+int command_read_block(int number_of_arguments, char **arguments){
+	unsigned int address = strtol(arguments[1],NULL,16);
+	unsigned char *ptr=(unsigned char*)(address);
+	int blockSize=strtol(arguments[2],NULL,10);
+
+	for(int i=0;i<blockSize;i++){
+		cprintf("val @ va %x = %c\n",ptr,*ptr);
+		ptr++;
+	}
+	return 0;
+}
