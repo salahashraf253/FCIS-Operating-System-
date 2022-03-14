@@ -95,6 +95,8 @@ struct Command commands[] =
 		//TODO: LAB2 Hands-on: add the commands here
 		{"read_block","reads the <N> bytes starting from <virtual address> and display them",
 				command_read_block},
+		{"create_int_array","creates an integer array with the given <array size>, display its start virtual address and allow the user to initialize its elements",
+				command_create_int_array},
 
 		//LAB3: Examples
 		{ "ikb", "Lab3.Example: shows mapping info of KERNEL_BASE" ,command_kernel_base_info},
@@ -158,8 +160,8 @@ int getMin(int x,int y,int z){
 //	else return z;
 	return min(min(x,y),z);
 }
-int editDistanceUsingDP(char *s1,char *s2){
-	int m =strlen(s1);
+int editDistanceUsingDP(char *s1,char *s2,int m){
+	//int m =strlen(s1);
 	int n= strlen(s2);
 	int dp[m+1][n+1];
 	for(int i=0;i<=m;i++)
@@ -188,9 +190,36 @@ char* getTheNearestCommandName(char *commandName){
 	char *nearestCommand=commandName;
 	for (int i = 0; i < NUM_OF_COMMANDS; i++)
 	{
+//		difference = abs(commandNameLength-strlen(commands[i].name));
+//		if(difference == 0 || difference == 1 || difference == 2){
+//		   // numberOfEdits=editDistanceUsingDP(commandName , commands[i].name);
+//			if(numberOfEdits<mn)
+//			{
+//				mn=numberOfEdits;
+//				nearestCommand=commands[i].name;
+//			}
+//		}
+	}
+	commandName=nearestCommand;
+	//cprintf("Command Name : %d\n",strlen(commandName));
+	return commandName;
+} //end of DP code
+int ctr=0;
+char* getTheNearestCommand(char commandName[],int size){
+	int mn=150;
+//	ctr++;
+//	if(ctr==2){
+//		cprintf("Command Name : %s, Size: %d\n",commandName,size);
+//	}
+
+	int commandNameLength=size;
+	int numberOfEdits,difference;
+	char *nearestCommand=commandName;
+	for (int i = 0; i < NUM_OF_COMMANDS; i++)
+	{
 		difference = abs(commandNameLength-strlen(commands[i].name));
 		if(difference == 0 || difference == 1 || difference == 2){
-		    numberOfEdits=editDistanceUsingDP(commandName , commands[i].name);
+		    numberOfEdits=editDistanceUsingDP(commandName , commands[i].name,size);
 			if(numberOfEdits<mn)
 			{
 				mn=numberOfEdits;
@@ -218,10 +247,12 @@ int getCommandIndex(char *commandName)
 void modifiedReadLine(const char *prompt,char *buf)
 {
 	int i=0,c,echoing ;
+	int ctr=0;
 	int lengthOfCommand=0;
 	if(prompt!=NULL){
 		cprintf("%s",prompt);
 	}
+
 	echoing =iscons(0);
 	bool foundFirstSpace=0;
 	while(1){
@@ -234,25 +265,25 @@ void modifiedReadLine(const char *prompt,char *buf)
 		}
 		else if(c==' ' && foundFirstSpace == 0){
 			foundFirstSpace=1;
-//			if(strcmp(buf,"read_block")==0){
-//				cprintf("Command Name  : %s\n",buf);
-//			}
 			//cprintf("Command Name  : %s\n",buf);
 
 			if(getCommandIndex(buf) == -1)
 			{
-				char *arr=getTheNearestCommandName(buf);
-				//cprintf("Nearest Command : %s\n",arr);
+				ctr++;
+//				if(ctr==2)
+//					cprintf("Buffer : %s ,size: %d\n",buf,strlen(buf));
+				char *arr=getTheNearestCommand(buf,i);
 				for(int j=0;j<i;j++){
 					cputchar('\b');
 				}
-			    int lengthOfRigthCommand=strlen(arr);
-				for(int j=0;j<lengthOfRigthCommand;j++){
-					cputchar(arr[j]);
-					buf[j]=arr[j];
+			    int lengthOfRightCommand=strlen(arr);
+			   // int lengthOfRigthCommand=strlen(arr);
+				for(int j=0;j<lengthOfRightCommand;j++){
+						cputchar(arr[j]);
+						buf[j]=arr[j];
 				}
-				lengthOfCommand=lengthOfRigthCommand;
-				i=lengthOfRigthCommand;
+				lengthOfCommand=lengthOfRightCommand;
+				i=lengthOfRightCommand;
 			}
 			char space=' ';
 			cputchar(space);
@@ -269,12 +300,18 @@ void modifiedReadLine(const char *prompt,char *buf)
 		else if (c == '\b' && i > 0)
 		{
 			if(lengthOfCommand==i-1){
-				//cprintf("------fddddddd---");
 				foundFirstSpace=0;
 			}
 			if (echoing)
 				cputchar(c);
+//			char c[20];
+//
+//			for(int j=0;j<i;j++){
+//				c[j]=buf[j];
+//			}
+
 			i--;
+			//buf=c;
 		}
 		else if (c == '\n' || c == '\r')
 		{
@@ -296,6 +333,7 @@ void run_command_prompt()
 	//TestAssignment1();
 	//================================================
 
+	char command_line[1024];
 	while (1==1)
 	{
 		//get command line
@@ -303,7 +341,7 @@ void run_command_prompt()
 
 		//this function is challenge 1 & made by me
 		//cprintf("CommandLine : %s\n",command_line);
-		char command_line[1024]={};
+
 		modifiedReadLine("FOS> ", command_line);
 
 		//cprintf("Command Line : %s \n",command_line);
@@ -765,8 +803,8 @@ int command_writeMemory(int number_of_arguments,char **arguments){
 //read_mem 0xf00000000
 int command_readMemory(int number_of_arguments,char **arguments){
 	unsigned int address=strtol(arguments[1],NULL,16);
-	unsigned char *ptr=(unsigned char*)(address);
-	cprintf("Value at address %x is %c\n",ptr,*ptr);
+	unsigned int *ptr=(unsigned int*)(address);
+	cprintf("Value at address %x is %d\n",ptr,*ptr);
 	return 0;
 }
 int command_read_block(int number_of_arguments, char **arguments){
@@ -776,6 +814,19 @@ int command_read_block(int number_of_arguments, char **arguments){
 
 	for(int i=0;i<blockSize;i++){
 		cprintf("val @ va %x = %c\n",ptr,*ptr);
+		ptr++;
+	}
+	return 0;
+}
+//create_int_array 1 2 3 4 5
+int *ptr=(int*)0xF1000000;
+int command_create_int_array(int number_of_arguments,char**arguments){
+	cprintf("The start address of allocated array is : %x\n",ptr);
+
+	for(int i=1;i<number_of_arguments;i++){
+		unsigned int num=strtol(arguments[i],NULL,10);
+		*ptr=num;
+		//cprintf("ptr : %x , value : %d\n",ptr,*ptr);
 		ptr++;
 	}
 	return 0;

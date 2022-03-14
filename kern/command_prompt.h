@@ -31,4 +31,5 @@ int command_writeMemory(int number_of_arguments,char **arguments);
 int command_readMemory(int number_of_arguments,char **arguments);
 
 int command_read_block(int number_of_arguments,char **arguments);
+int command_create_int_array(int number_of_arguments,char**arguments);
 #endif	// !FOS_KERN_MONITOR_H
