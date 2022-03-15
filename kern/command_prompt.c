@@ -139,7 +139,7 @@ struct Command commands[] =
 // ------------------------------------------------------------
 // ------------------------------------------------------------
 #define BUFLEN 1024
-//dp code
+
 int min(int x,int y){
 	if(x==y)return x;
 	else if(x<y)return x;
@@ -151,17 +151,11 @@ int abs(int x){
 	else return x*-1;
 }
 int getMin(int x,int y,int z){
-//	if(x<=y&&x<=z){
-//		return x;
-//	}
-//	else if(y<=x&&y<=z){
-//		return y;
-//	}
-//	else return z;
 	return min(min(x,y),z);
 }
+//dp code
 int editDistanceUsingDP(char *s1,char *s2,int m){
-	//int m =strlen(s1);
+
 	int n= strlen(s2);
 	int dp[m+1][n+1];
 	for(int i=0;i<=m;i++)
@@ -183,35 +177,9 @@ int editDistanceUsingDP(char *s1,char *s2,int m){
 	}
 	return dp[m][n];
 }
-char* getTheNearestCommandName(char *commandName){
-	int mn=150;
-	int commandNameLength=strlen(commandName);
-	int numberOfEdits,difference;
-	char *nearestCommand=commandName;
-	for (int i = 0; i < NUM_OF_COMMANDS; i++)
-	{
-//		difference = abs(commandNameLength-strlen(commands[i].name));
-//		if(difference == 0 || difference == 1 || difference == 2){
-//		   // numberOfEdits=editDistanceUsingDP(commandName , commands[i].name);
-//			if(numberOfEdits<mn)
-//			{
-//				mn=numberOfEdits;
-//				nearestCommand=commands[i].name;
-//			}
-//		}
-	}
-	commandName=nearestCommand;
-	//cprintf("Command Name : %d\n",strlen(commandName));
-	return commandName;
-} //end of DP code
-int ctr=0;
+
 char* getTheNearestCommand(char commandName[],int size){
 	int mn=150;
-//	ctr++;
-//	if(ctr==2){
-//		cprintf("Command Name : %s, Size: %d\n",commandName,size);
-//	}
-
 	int commandNameLength=size;
 	int numberOfEdits,difference;
 	char *nearestCommand=commandName;
@@ -228,7 +196,6 @@ char* getTheNearestCommand(char commandName[],int size){
 		}
 	}
 	commandName=nearestCommand;
-	//cprintf("Command Name : %d\n",strlen(commandName));
 	return commandName;
 } //end of DP code
 int getCommandIndex(char *commandName)
@@ -265,20 +232,17 @@ void modifiedReadLine(const char *prompt,char *buf)
 		}
 		else if(c==' ' && foundFirstSpace == 0){
 			foundFirstSpace=1;
-			//cprintf("Command Name  : %s\n",buf);
-
 			if(getCommandIndex(buf) == -1)
 			{
-				ctr++;
-//				if(ctr==2)
-//					cprintf("Buffer : %s ,size: %d\n",buf,strlen(buf));
 				char *arr=getTheNearestCommand(buf,i);
+
+				//delete the wrong command name
 				for(int j=0;j<i;j++){
 					cputchar('\b');
 				}
 			    int lengthOfRightCommand=strlen(arr);
-			   // int lengthOfRigthCommand=strlen(arr);
-				for(int j=0;j<lengthOfRightCommand;j++){
+				//write in the screen the right command name
+			    for(int j=0;j<lengthOfRightCommand;j++){
 						cputchar(arr[j]);
 						buf[j]=arr[j];
 				}
@@ -286,8 +250,8 @@ void modifiedReadLine(const char *prompt,char *buf)
 				i=lengthOfRightCommand;
 			}
 			char space=' ';
-			cputchar(space);
-			buf[i++] = space;
+			cputchar(' ');
+			buf[i++] = ' ';
 		}
 		else if (c >= ' ' && i < BUFLEN-1)
 		{
@@ -295,8 +259,6 @@ void modifiedReadLine(const char *prompt,char *buf)
 				cputchar(c);
 			buf[i++] = c;
 		}
-		//0 1 2 3 4
-		//a d d   2
 		else if (c == '\b' && i > 0)
 		{
 			if(lengthOfCommand==i-1){
@@ -304,14 +266,7 @@ void modifiedReadLine(const char *prompt,char *buf)
 			}
 			if (echoing)
 				cputchar(c);
-//			char c[20];
-//
-//			for(int j=0;j<i;j++){
-//				c[j]=buf[j];
-//			}
-
 			i--;
-			//buf=c;
 		}
 		else if (c == '\n' || c == '\r')
 		{
