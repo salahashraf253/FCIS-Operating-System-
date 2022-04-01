@@ -156,6 +156,7 @@ int getMin(int x,int y,int z){
 //dp code
 int editDistanceUsingDP(char *s1,char *s2,int m){
 
+	//m is the size of string1
 	int n= strlen(s2);
 	int dp[m+1][n+1];
 	for(int i=0;i<=m;i++)
@@ -208,11 +209,12 @@ int getCommandIndex(char *commandName)
 	}
 	return -1; // command is not found
 }
-//this function is challenge 1 & made by me
-//this function is responsible for auto correct command by
-//using edit distance , it works when you press space after command name directly
+
 void modifiedReadLine(const char *prompt,char *buf)
 {
+	//this function is challenge 1 & made by Salah Ashraf ASU 2023
+	//this function is responsible for auto correct command by
+	//using edit distance , it works when you press space after command name directly
 	int i=0,c,echoing ;
 	int ctr=0;
 	int lengthOfCommand=0;
@@ -743,7 +745,7 @@ void ExecuteCommands()
 		execute_command(commands[i]);
 	}
 }
-//Laba 2 hands on Commands ----------------------------------------
+// ----------------------------------------Lab 2 hands on Commands ----------------------------------------
 
 //write_mem 0xf00000000 c
 int command_writeMemory(int number_of_arguments,char **arguments){
@@ -786,3 +788,5 @@ int command_create_int_array(int number_of_arguments,char**arguments){
 	}
 	return 0;
 }
+// ---------------------------------------- Lab 4 Hands on commands  ----------------------------------------
+
