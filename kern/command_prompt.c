@@ -435,11 +435,36 @@ int command_meminfo(int number_of_arguments, char **arguments)
 //===========================================================================
 //Lab3.Examples
 //=============
+//Info:
+//va: virtual address
+//to get index of page table (directory): we use PDX(va) OR va>>22
+//to get index of page: we do va<<10 then va>>22 OR PTX(va)
+
 int command_kernel_base_info(int number_of_arguments, char **arguments)
 {
 	//TODO: LAB3 Example: fill this function. corresponding command name is "ikb"
 	//Comment the following line
-	panic("Function is not implemented yet!");
+	//panic("Function is not implemented yet!");
+//
+//	uint32 pageTableIndex=PDX(KERNEL_BASE);
+//	uint32 pageIndex=PTX(KERNEL_BASE);
+//	cprintf("Page table index: %d\n",pageTableIndex);
+//	cprintf("Page index: %d\n",pageIndex);
+//
+//	//frame number of page table
+//	uint32 directoryEntry= ptr_page_directory[pageTableIndex];
+//	uint32 pageTableFrameNumber= directoryEntry>>12;
+//	cprintf("Frame number of page table: %d\n",pageTableFrameNumber);
+
+	//frame number of page
+	uint32* ptr=NULL;
+	get_page_table(ptr_page_directory,KERNEL_BASE,0,&ptr);
+	if(ptr!=NULL){
+		cprintf("page table found at virtual address:%x\n", ptr);
+//		uint32 pageEntry=ptr_page_table[pageIndex];
+//		uint32 pageFrameNumber=pageEntry>>12;
+//		cprintf("Frame number of page: %d\n",pageFrameNumber);
+	}
 
 	return 0;
 }
@@ -789,4 +814,3 @@ int command_create_int_array(int number_of_arguments,char**arguments){
 	return 0;
 }
 // ---------------------------------------- Lab 4 Hands on commands  ----------------------------------------
-
