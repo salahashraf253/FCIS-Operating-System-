@@ -445,27 +445,32 @@ int command_kernel_base_info(int number_of_arguments, char **arguments)
 	//TODO: LAB3 Example: fill this function. corresponding command name is "ikb"
 	//Comment the following line
 	//panic("Function is not implemented yet!");
-//
-//	uint32 pageTableIndex=PDX(KERNEL_BASE);
-//	uint32 pageIndex=PTX(KERNEL_BASE);
-//	cprintf("Page table index: %d\n",pageTableIndex);
-//	cprintf("Page index: %d\n",pageIndex);
-//
-//	//frame number of page table
-//	uint32 directoryEntry= ptr_page_directory[pageTableIndex];
-//	uint32 pageTableFrameNumber= directoryEntry>>12;
-//	cprintf("Frame number of page table: %d\n",pageTableFrameNumber);
+
+	uint32 virutalAddress=strtol(arguments[1],NULL,16);
+	uint32 pageTableIndex=PDX(virutalAddress);
+	uint32 pageIndex=PTX(virutalAddress);
+	cprintf("Page table index: %d\n",pageTableIndex);
+	cprintf("Page index: %d\n",pageIndex);
+
+	//frame number of page table
+	uint32 directoryEntry= ptr_page_directory[pageTableIndex];
+	uint32 pageTableFrameNumber= directoryEntry>>12;
+	cprintf("Frame number of page table: %d\n",pageTableFrameNumber);
 
 	//frame number of page
-	uint32* ptr=NULL;
-	get_page_table(ptr_page_directory,KERNEL_BASE,0,&ptr);
-	if(ptr!=NULL){
-		cprintf("page table found at virtual address:%x\n", ptr);
-//		uint32 pageEntry=ptr_page_table[pageIndex];
-//		uint32 pageFrameNumber=pageEntry>>12;
-//		cprintf("Frame number of page: %d\n",pageFrameNumber);
+	uint32* ptr_page_table=NULL;
+	get_page_table(ptr_page_directory,(int*)virutalAddress,0,&ptr_page_table);
+	if(ptr_page_table!=NULL){
+		cprintf("page table found at virtual address:%x\n", ptr_page_table);
+		uint32 pageEntry=ptr_page_table[PTX(virutalAddress)];
+		uint32 pageFrameNumber=pageEntry>>12;
+		cprintf("Page Entry : %d\n",pageEntry);
+		cprintf("Frame number of page: %d\n",pageFrameNumber);
+		cprintf("Offset : %d\n",pageFrameNumber<<20);
+		int frameNo=pageFrameNumber>>12;
+		cprintf("# frame: %d\n",frameNo);
+		cprintf("Reference of this # frame: %d\n",frames_info[pageFrameNumber].references);
 	}
-
 	return 0;
 }
 
@@ -474,29 +479,77 @@ int command_del_kernel_base(int number_of_arguments, char **arguments)
 {
 	//TODO: LAB3 Example: fill this function. corresponding command name is "dkb"
 	//Comment the following line
-	panic("Function is not implemented yet!");
+	//panic("Function is not implemented yet!");
 
 	return 0;
 }
+
 
 int command_share_page(int number_of_arguments, char **arguments)
 {
 	//TODO: LAB3 Example: fill this function. corresponding command name is "shr"
 	//Comment the following line
-	panic("Function is not implemented yet!");
+	//panic("Function is not implemented yet!");
 
+	//shr 0xF00000000 0 256000
+	uint32 virtualAddress1=strtol(arguments[1],NULL,16);
+	uint32 virtualAddress2=strtol(arguments[2],NULL,16);
+
+	uint32* ptr_table1=NULL;
+	uint32* ptr_table2=NULL;
+
+	get_page_table(ptr_page_directory,(void*)virtualAddress1,0,&ptr_table1);
+	if(ptr_table1!=NULL){
+		get_page_table(ptr_page_directory,(void*)virtualAddress2,1,&ptr_table2);
+
+		int pageIndexOfAddress1=PTX(virtualAddress1);
+		int pageIndexOfAddress2=PTX(virtualAddress2);
+
+		ptr_table2[pageIndexOfAddress2]=ptr_table1[pageIndexOfAddress1];
+		cprintf("Sharing page is Done\n");
+	}
 	return 0;
 }
 
 //===========================================================================
 //Lab4.Hands.On
 //=============
+int getDirectoryIndex(uint32 virtualAddress){
+	return PDX(virtualAddress);
+}
+int getPageTableIndex(uint32 virtualAddress){
+	return PTX(virtualAddress);
+}
 int command_show_mapping(int number_of_arguments, char **arguments)
 {
 	//TODO: LAB4 Hands-on: fill this function. corresponding command name is "sm"
 	//Comment the following line
-	panic("Function is not implemented yet!");
+	//panic("Function is not implemented yet!");
 
+	//sm 0xF0000000
+	cprintf("Directory Virtual Address: %x\n",ptr_page_directory);
+	uint32 virtualAddress=strtol(arguments[1],NULL,16);
+
+	int directoryIndex=PDX(virtualAddress);
+	cprintf("Directory Index: %d\n",directoryIndex);
+
+	int pageTableIndex=PTX(virtualAddress);
+	cprintf("Page Table Index: %d\n",pageTableIndex);
+
+	uint32* pageTableVirtualAddress=NULL;
+	get_page_table(ptr_page_directory,(void*)virtualAddress,0,&pageTableVirtualAddress);
+
+	uint32 pageTableEntry= ptr_page_directory[directoryIndex];
+	cprintf("Page Table Entry: %x\n",pageTableEntry);
+	if(pageTableEntry & PERM_PRESENT){
+		cprintf("Table is present\n");
+	}
+	else cprintf("Table is not present\n");
+
+	if((pageTableVirtualAddress[pageTableIndex] & PERM_PRESENT)>0){
+		cprintf("Page is used\n");
+	}
+	else cprintf("Page is not used\n");
 	return 0 ;
 }
 
@@ -504,17 +557,57 @@ int command_set_permission(int number_of_arguments, char **arguments)
 {
 	//TODO: LAB4 Hands-on: fill this function. corresponding command name is "sp"
 	//Comment the following line
-	panic("Function is not implemented yet!");
+	//panic("Function is not implemented yet!");
 
+	uint32 virtualAddress=strtol(arguments[1],NULL,16);
+
+	uint32* pageTableVirtualAddress=NULL;
+	get_page_table(ptr_page_directory,(void*)virtualAddress,1,&pageTableVirtualAddress);
+
+	int pageTableIndex=getPageTableIndex(virtualAddress);
+
+	if(arguments[2][0]=='w'){
+		pageTableVirtualAddress[pageTableIndex] |= PERM_WRITEABLE;
+	}
+	else
+		pageTableVirtualAddress[pageTableIndex] &= ~PERM_WRITEABLE;
 	return 0 ;
 }
 
 int command_share_range(int number_of_arguments, char **arguments)
 {
-	//TODO: LAB4 Hands-on: fill this function. corresponding command name is "sr"
-	//Comment the following line
-	panic("Function is not implemented yet!");
+	int address1=strtol(arguments[1],NULL,16);
+	int address2=strtol(arguments[2],NULL,16);
+	int sz = strtol(arguments[3],NULL,10);
 
+	int mod =sz%4;
+	int toShare=sz/4;
+	if(mod!=0)
+		toShare++;
+
+	uint32* pageTable1Va;
+	uint32* pageTable2Va;
+	get_page_table(ptr_page_directory,(int*)address1,0,&pageTable1Va);
+	get_page_table(ptr_page_directory,(int*)address2,1,&pageTable2Va);
+
+	if(pageTable1Va != NULL && pageTable2Va !=NULL){
+		int index1=PTX(address1);
+		int index2=PTX(address2);
+
+		int tmpVar1=address1;
+		int tmpVar2=address2;
+
+		uint32 *pageTable1;
+		uint32 * pageTable2;
+		for(int i=0;i<toShare;i++){
+			get_page_table(ptr_page_directory,(int*)tmpVar1,0,&pageTable1);
+			get_page_table(ptr_page_directory,(int*)tmpVar2,1,&pageTable2);
+
+			pageTable2[PTX(tmpVar2)]=pageTable1[PTX(tmpVar1)];
+			tmpVar1+=PAGE_SIZE;
+			tmpVar2+=PAGE_SIZE;
+		}
+	}
 	return 0;
 }
 
@@ -526,8 +619,10 @@ int command_nr(int number_of_arguments, char **arguments)
 {
 	//TODO: LAB5 Example: fill this function. corresponding command name is "nr"
 	//Comment the following line
-	panic("Function is not implemented yet!");
-
+	//panic("Function is not implemented yet!");
+	uint32 physicalAddress=strtol(arguments[1],NULL,16);
+	struct Frame_Info *ptr_frame_info=to_frame_info(physicalAddress);
+	cprintf("The number of reference are %d\n",ptr_frame_info->references);
 	return 0;
 }
 
@@ -538,11 +633,21 @@ int command_ap(int number_of_arguments, char **arguments)
 	//Comment the following line
 	//panic("Function is not implemented yet!");
 
-	uint32 va = strtol(arguments[1], NULL, 16);
-	struct Frame_Info* ptr_frame_info;
-	int ret = allocate_frame(&ptr_frame_info) ;
-	map_frame(ptr_page_directory, ptr_frame_info, (void*)va, PERM_USER | PERM_WRITEABLE);
-
+	uint32 virtualAddress = strtol(arguments[1], NULL, 16);
+	uint32 * ptr_page_table = NULL;
+	struct Frame_Info * ptr_frame_info=get_frame_info(ptr_page_directory,(void*)virtualAddress,&ptr_page_table);
+	if(ptr_frame_info!=NULL){
+		return 0;	//the frame is connected already
+	}
+	int ret =allocate_frame(&ptr_frame_info);
+	if(ret == E_NO_MEM){
+		return -1;
+	}
+	ret =map_frame(ptr_page_directory,ptr_frame_info,(void*)virtualAddress,PERM_USER | PERM_WRITEABLE);
+	if(ret==E_NO_MEM){
+		free_frame(ptr_frame_info);
+		return -1;
+	}
 	return 0 ;
 }
 
@@ -568,7 +673,7 @@ int command_asp(int number_of_arguments, char **arguments)
 {
 	//TODO: LAB5 Hands-on: fill this function. corresponding command name is "asp"
 	//Comment the following line
-	panic("Function is not implemented yet!");
+	//panic("Function is not implemented yet!");
 
 	return 0;
 }
